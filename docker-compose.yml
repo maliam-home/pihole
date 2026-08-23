@@ -74,6 +74,7 @@ services:
         traefik-dashboard.maliam.net,jolt.maliam.net
         photos.maliam.net,jolt.maliam.net
         media.maliam.net,jolt.maliam.net
+        cameras.maliam.net,jolt.maliam.net
         homeassistant.maliam.net,bumblebee.maliam.net
         ha.maliam.net,jolt.maliam.net
         hikvision.maliam.net,jolt.maliam.net
@@ -117,7 +118,20 @@ services:
       - "traefik.http.services.dns.loadbalancer.server.port=${PIHOLE_HTTP_PORT}"
     sysctls:
       - net.ipv4.conf.all.arp_ignore=1
-      - net.ipv4.conf.all.arp_announce=2    
+      - net.ipv4.conf.all.arp_announce=2
+
+  dnsproxy:
+    image: satishweb/doh-server:latest
+    container_name: dnsproxy
+    restart: unless-stopped
+    environment:
+      - UPSTREAM_DNS_SERVER=udp:pihole:53
+      - DOH_HTTP_PREFIX=/dns-query
+      - DOH_SERVER_LISTEN=:8053
+    depends_on:
+      - pihole
+    networks:
+      - proxy0
 
 networks:
   # macvlan0:
